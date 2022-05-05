@@ -60,7 +60,8 @@ int main(int argc, char* argv[])
     exit(0);
     }
 
-  int    port     = atoi(argv[1]);
+  int    port = 1512;   //atoi(argv[1]);
+  
 
   igtl::ServerSocket::Pointer serverSocket;
   serverSocket = igtl::ServerSocket::New();
@@ -102,6 +103,7 @@ int main(int argc, char* argv[])
         // Receive generic header from the socket
         bool timeout(false);
         igtlUint64 r = socket->Receive(headerMsg->GetPackPointer(), headerMsg->GetPackSize(), timeout);
+        //int r = socket->Receive(headerMsg->GetPackPointer(), headerMsg->GetPackSize(), timeout);
         if (r == 0)
           {
           socket->CloseSocket();
@@ -172,6 +174,7 @@ int main(int argc, char* argv[])
           socket->Skip(headerMsg->GetBodySizeToRead(), 0);
           }
         }
+      //break;
       }
     }
     
@@ -246,7 +249,7 @@ int ReceivePosition(igtl::Socket * socket, igtl::MessageHeader * header)
     std::cerr << "quaternion = (" << quaternion[0] << ", " << quaternion[1] << ", "
               << quaternion[2] << ", " << quaternion[3] << ")" << std::endl << std::endl;
 
-    return 1;
+        return 1;
     }
 
   return 0;
@@ -383,6 +386,36 @@ int ReceivePoint(igtl::Socket * socket, igtl::MessageHeader * header)
       std::cerr << " Radius    : " << std::fixed << pointElement->GetRadius() << std::endl;
       std::cerr << " Owner     : " << pointElement->GetOwner() << std::endl;
       std::cerr << "================================" << std::endl;
+
+
+      igtl::PointMessage::Pointer pointMsgSend;
+      pointMsgSend = igtl::PointMessage::New();
+      pointMsgSend->SetDeviceName("PointSender");
+
+      pos[0] = pos[0] * -1;
+      pos[1] = pos[1] * -1;
+      pos[2] = pos[2] * -1;
+
+      //---------------------------
+      // Create 1st point
+      igtl::PointElement::Pointer point0;
+      point0 = igtl::PointElement::New();
+      point0->SetName(pointElement->GetName());
+      point0->SetGroupName(pointElement->GetGroupName());
+      point0->SetRGBA(rgba);
+      point0->SetPosition(pos);
+      point0->SetRadius(pointElement->GetRadius());
+      point0->SetOwner(pointElement->GetOwner());
+
+
+      //---------------------------
+      // Pack into the point message
+      pointMsgSend->AddPointElement(point0);
+
+      pointMsgSend->Pack();
+      igtl::Sleep(1000);
+      socket->Send(pointMsgSend->GetPackPointer(), pointMsgSend->GetPackSize());
+
       }
     }
 
