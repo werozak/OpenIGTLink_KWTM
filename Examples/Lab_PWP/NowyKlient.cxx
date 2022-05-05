@@ -102,6 +102,17 @@ int main(int argc, char* argv[])
   socket->Send(pointMsg->GetPackPointer(), pointMsg->GetPackSize());
   
   
+  while (1)
+  {
+      igtl::MessageHeader::Pointer headerMsg;
+      headerMsg = igtl::MessageHeader::New();
+      headerMsg->InitPack();
+
+      
+  }
+  
+
+
   //------------------------------------------------------------
   // Close the socket
   socket->CloseSocket();
